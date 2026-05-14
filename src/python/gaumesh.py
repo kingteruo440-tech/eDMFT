@@ -14,9 +14,37 @@ import sys
 import os
 import math
 
-from scipy.special import erf
-from scipy.optimize import bisect
 from math import *
+
+
+def bisect(func, a, b, args=(), xtol=1e-12, maxiter=100):
+    """Return a root of func in [a, b] using bisection.
+
+    This small local implementation keeps gaumesh.py usable on systems
+    where SciPy is not installed.
+    """
+    fa = func(a, *args)
+    fb = func(b, *args)
+    if fa == 0:
+        return a
+    if fb == 0:
+        return b
+    if fa * fb > 0:
+        raise ValueError("bisect interval does not bracket a root")
+
+    lo, hi = a, b
+    flo = fa
+    for _ in range(maxiter):
+        mid = 0.5 * (lo + hi)
+        fmid = func(mid, *args)
+        if fmid == 0 or abs(hi - lo) <= xtol:
+            return mid
+        if flo * fmid < 0:
+            hi = mid
+        else:
+            lo = mid
+            flo = fmid
+    raise RuntimeError("bisect failed to converge")
 
 class GauMesh:
     #
@@ -103,7 +131,7 @@ if len(sys.argv[1:]) == 0 or sys.argv[1] == "--help" or sys.argv[1] == "-h":
     2) xmin and xmax are merely upper and lower bounds. If the Gaussians are very
        localized (i.e. small fwhm) the actual range of the mesh will be much smaller
        than [xmin,xmax]. To get a mesh with an approximate range of [xmin,xmax]
-       have one gaussian centered at (xmin+xmax)/2 with a FWHM of at least (xmax-xmin)/2
+       have one Gaussian centered at (xmin+xmax)/2 with a FWHM of at least (xmax-xmin)/2
     
     """)
     
@@ -112,8 +140,8 @@ if len(sys.argv[1:]) == 0 or sys.argv[1] == "--help" or sys.argv[1] == "-h":
 x0 = []
 dx0 = []
 fwhm = []
-xmin = 0
-xmax = 0
+xmin = None
+xmax = None
 
 A = []
 alpha = []
@@ -133,12 +161,12 @@ if not dx0:
 if not fwhm:
     sys.stderr.write("Error: fwhm[:] was not defined. Abort.\n")
     sys.exit(1)
-if (not xmin) or (not xmax):
-    sys.stderr.write("Error: xmin,xmax have not been defined.Abort.\n")
+if xmin is None or xmax is None:
+    sys.stderr.write("Error: xmin,xmax have not been defined. Abort.\n")
     sys.exit(1)
 
 if len(x0) != len(dx0) or len(x0) != len(fwhm):
-    sys.stderr.write("Error: Lists x0[:],dx0[0],fwhm[:] have different lengths.Abort.\n")
+    sys.stderr.write("Error: Lists x0[:],dx0[:],fwhm[:] have different lengths. Abort.\n")
     sys.exit(1)
 
 
