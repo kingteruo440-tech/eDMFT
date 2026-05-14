@@ -4,16 +4,16 @@
 !     ..................................................................
 !
 ! 1.     PROGRAM UNIT 'ERRFLG'
-!           Notify that an error has occured.
+!           Notify that an error has occurred.
 !           FORTRAN 77 SUBROUTINE
 !
 ! 2.     PURPOSE
 !           Because there is no standard (or even semi-standard) way to
 !           generate exit codes in FORTRAN 77, this routine writes a
 !           non-empty file to the current subdirectory as an indication
-!           that some serious error has occured. Other programs can then
+!           that some serious error has occurred. Other programs can then
 !           check the contents of this file to determine whether an
-!           error has occured. The errorflag-file is left opened when
+!           error has occurred. The errorflag-file is left opened when
 !           returning from this routine to enable writing other
 !           errormessages to it.
 !
